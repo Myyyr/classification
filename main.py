@@ -14,6 +14,7 @@ from tqdm import tqdm
 import cifar10_data_loader
 import train
 
+from config_resnet34 import *
 
 
 def test(net, testloader, ltestset, nClasses = 10):
