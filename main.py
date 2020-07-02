@@ -64,18 +64,18 @@ def main():
 					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False)
-	train.save_results(train_results, "./results") 
+	train.save_results({FOLD:train_results}, "./results") 
 
 	test_results = train.train(model,
 					          criterion,
-					          optimiser,
+					          optimizer,
 					          1,
 					          {"test":testloader},
 					          fold_num = 1,
-					          scheduler = train.get_scheduler(),
+					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False)
-	train.save_results(test_results, "./results") 
+	train.save_results({FOLD:test_results}, "./results") 
 
 	
 def convert_bytes(size, isbytes = True):

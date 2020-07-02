@@ -10,12 +10,13 @@ from torchvision import transforms, models
 
 #import pytorch_lightning as pl
 
-from sklearn.metrics import roc_auc_score, auc
+from sklearn.metrics import roc_auc_score, auc, log_loss
 
 import os
 import copy
 
 from tqdm.notebook import tqdm
+import tqdm as tq
 import time
 
 from EarlyStopping import EarlyStopping
@@ -128,7 +129,7 @@ def run_training(model,
     t0 = time.time()
 
     early_stop = EarlyStopping(patience)
-    
+    break_training = False
     for epoch in range(num_epochs):
         
         for phase in phases:
@@ -141,12 +142,13 @@ def run_training(model,
             else:
                 model.eval()
                 
-            all_probas = np.zeros(len(dataloader)*dataloader.batch_size)
+            all_probas = np.zeros((len(dataloader)*dataloader.batch_size, model.n_classes))
             all_targets = np.zeros(len(dataloader)*dataloader.batch_size)   
             running_loss = 0.0
             running_true_positives = 0
             running_false_positives = 0
             running_false_negatives = 0
+            
             
                       
             for counter, data in enumerate(dataloader_iterator):
@@ -165,7 +167,7 @@ def run_training(model,
                 
                 raw_output = model(image_input) 
                 pred_probas = F.softmax(raw_output, dim=1)
-                # print("pred_probas :", pred_probas.shape)
+                #print("pred_probas :", pred_probas.shape)
                 _, preds = torch.max(pred_probas, 1)
                 
                 
@@ -187,7 +189,8 @@ def run_training(model,
                 # batch_size = dataloader.batch_size
                 batch_size = target_input.shape[0]
                 all_targets[(counter*batch_size):((counter+1)*batch_size)] = target_input.cpu().detach().numpy()
-                all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()[:,1]
+                all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()#[:,1]
+                # all_probas[(counter*batch_size):((counter+1)*batch_size)] = preds.cpu().detach().numpy()
 
                 if batch_size != dataloader.batch_size:
                   all_targets = all_targets[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
@@ -208,10 +211,14 @@ def run_training(model,
                         scheduler.step()
 
 
-            # print("all_targets : ", np.unique(all_targets).shape)
-            # print("all_probas : ", np.unique(all_probas).shape)
+            # print("all_targets : ", np.unique(all_targets))
+            # print("all_probas : ", np.unique(all_probas))
             
-            epoch_auc_score = roc_auc_score(all_targets, all_probas, multi_class="ovr")
+            # print("all_targets : ", all_targets.shape)
+            # print("all_probas : ", all_probas.shape)
+
+            
+            epoch_auc_score = log_loss(all_targets, all_probas) #roc_auc_score(all_targets, all_probas, multi_class="ovr")
             results.results[phase].epoch_scores.append(epoch_auc_score)
             results.results[phase].memory.append(torch.cuda.max_memory_allocated())
             results.results[phase].time.append(time.time() - t0)
@@ -234,12 +241,17 @@ def run_training(model,
                     #     if patience_counter == patience:
                     #         print("Model hasn't improved for {} epochs. Training finished.".format(patience))
                     #         break
-                    early_stop(-epoch_auc_score, model)
+                    early_stop(epoch_auc_score, model)
                     if not early_stop.early_stop:
                       best_model_wts = copy.deepcopy(model.state_dict())
                     else:
                       print("Model hasn't improved for {} epochs. Training finished.".format(patience))
+                      break_training = True
                       break
+
+
+        if break_training:
+          break
 
                
     # load best model weights
@@ -262,15 +274,15 @@ def train(model,
     
     single_results = Results(fold_num, model)
     
-    single_results = run_training(model,
-                                  criterion,
-                                  optimiser,
-                                  num_epochs,
-                                  dataloaders_dict,
-                                  fold_num,
-                                  scheduler,
-                                  patience,
-                                  single_results, 
-                                  find_lr=find_lr)
+    # single_results = run_training(model,
+    #                               criterion,
+    #                               optimiser,
+    #                               num_epochs,
+    #                               dataloaders_dict,
+    #                               fold_num,
+    #                               scheduler,
+    #                               patience,
+    #                               single_results, 
+    #                               find_lr=find_lr)
        
     return single_results

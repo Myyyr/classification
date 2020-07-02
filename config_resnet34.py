@@ -15,4 +15,6 @@ MAX_LR = LR/100
 STEPSIZE = 2*(int((0.9*50000/512)) + 1 )
 
 
-MODEL = GenModel(ResNet.resnet34(), 1000, 10)
+MODEL = GenModel(ResNet.resnet34(), 10, 1000)
+
+FOLD = "resnet34"

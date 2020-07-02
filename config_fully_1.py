@@ -14,3 +14,5 @@ N_CLASSES = 10
 
 
 MODEL = fully.FullyReversible(CHANNELS, N_BLOCK, N_CLASSES)
+
+FOLD = "resnet34"
