@@ -60,7 +60,7 @@ def main():
 					          optimizer,
 					          EPOCHS,
 					          {"train":trainloader, "dev":validloader},
-					          fold_num = 1,
+					          fold_num = FOLD,
 					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False)
@@ -71,7 +71,7 @@ def main():
 					          optimizer,
 					          1,
 					          {"test":testloader},
-					          fold_num = 1,
+					          fold_num = FOLD,
 					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False)

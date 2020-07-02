@@ -189,8 +189,8 @@ def run_training(model,
                 # batch_size = dataloader.batch_size
                 batch_size = target_input.shape[0]
                 all_targets[(counter*batch_size):((counter+1)*batch_size)] = target_input.cpu().detach().numpy()
-                all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()#[:,1]
-                # all_probas[(counter*batch_size):((counter+1)*batch_size)] = preds.cpu().detach().numpy()
+                # all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()#[:,1]
+                all_probas[(counter*batch_size):((counter+1)*batch_size)] = preds.cpu().detach().numpy()
 
                 if batch_size != dataloader.batch_size:
                   all_targets = all_targets[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
@@ -218,7 +218,8 @@ def run_training(model,
             # print("all_probas : ", all_probas.shape)
 
             
-            epoch_auc_score = log_loss(all_targets, all_probas) #roc_auc_score(all_targets, all_probas, multi_class="ovr")
+            # epoch_auc_score = log_loss(all_targets, all_probas) #roc_auc_score(all_targets, all_probas, multi_class="ovr")
+            epoch_auc_score = np.sum((all_targets == all_probas)*1)/all_targets.shape[0]
             results.results[phase].epoch_scores.append(epoch_auc_score)
             results.results[phase].memory.append(torch.cuda.max_memory_allocated())
             results.results[phase].time.append(time.time() - t0)
@@ -228,7 +229,7 @@ def run_training(model,
             epoch_loss = running_loss / len(dataloader.dataset)
             results.results[phase].epoch_losses.append(epoch_loss)
             
-            print("fold: {}, epoch: {}, phase: {}, e-loss: {}, e-auc: {}".format(
+            print("fold: {}, epoch: {}, phase: {}, e-loss: {}, prec: {}".format(
                 fold_num, epoch, phase, epoch_loss, epoch_auc_score))
             
             if not find_lr:
