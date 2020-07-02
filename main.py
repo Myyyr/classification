@@ -14,7 +14,7 @@ from tqdm import tqdm
 import cifar10_data_loader
 import train
 
-from config_resnet34 import *
+from config_resnet34_steplr import *
 
 
 def test(net, testloader, ltestset, nClasses = 10):
@@ -61,7 +61,7 @@ def main():
 					          EPOCHS,
 					          {"train":trainloader, "dev":validloader},
 					          fold_num = FOLD,
-					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = PATIENCE,
 					          find_lr=False)
 	train.save_results({FOLD:train_results}, "./results") 
@@ -72,7 +72,7 @@ def main():
 					          1,
 					          {"test":testloader},
 					          fold_num = FOLD,
-					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False,
 					          results=train_results)
