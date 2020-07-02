@@ -62,7 +62,7 @@ def main():
 					          {"train":trainloader, "dev":validloader},
 					          fold_num = FOLD,
 					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
-					          patience = 4,
+					          patience = PATIENCE,
 					          find_lr=False)
 	train.save_results({FOLD:train_results}, "./results") 
 
@@ -74,7 +74,8 @@ def main():
 					          fold_num = FOLD,
 					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
-					          find_lr=False)
+					          find_lr=False,
+					          results=train_results)
 	train.save_results({FOLD:test_results}, "./results") 
 
 	

@@ -38,7 +38,7 @@ def save_results(results, foldername):
         model_path = base_dir + "model.pth"
         torch.save(model.state_dict(), model_path)
         
-        for phase in ["train", "dev"]:
+        for phase in ["train", "dev", "test"]:
             losses = results[fold].results[phase].losses
             epoch_losses = results[fold].results[phase].epoch_losses
             epoch_scores = results[fold].results[phase].epoch_scores
@@ -82,8 +82,10 @@ class Results:
         self.fold_num = fold_num
         self.train_results = ResultsBean()
         self.dev_results = ResultsBean()
+        self.test_results = ResultsBean()
         self.results = {"train": self.train_results,
-                        "dev": self.dev_results}
+                        "dev": self.dev_results,
+                        "test": self.test_results}
 
 def get_lr_search_scheduler(optimiser, min_lr, max_lr, max_iterations):
     # max_iterations should be the number of steps within num_epochs_*epoch_iterations
@@ -122,7 +124,7 @@ def run_training(model,
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
-    phases = ["train", "dev"]
+    phases = dataloaders_dict.keys()
     best_auc = 0
     patience_counter = 0
     epsilon = 1e-7
@@ -243,7 +245,7 @@ def run_training(model,
                     #     if patience_counter == patience:
                     #         print("Model hasn't improved for {} epochs. Training finished.".format(patience))
                     #         break
-                    early_stop(epoch_auc_score, model)
+                    early_stop(-epoch_auc_score, model)
                     if not early_stop.early_stop:
                       best_model_wts = copy.deepcopy(model.state_dict())
                     else:
@@ -257,7 +259,7 @@ def run_training(model,
 
                
     # load best model weights
-    if not find_lr:
+    if not find_lr and "test" not in phases:
         model.load_state_dict(best_model_wts)
     
     results.model = model
@@ -272,9 +274,13 @@ def train(model,
           fold_num,
           scheduler,
           patience,
-          find_lr=False):
+          find_lr=False,
+          results = None):
     
-    single_results = Results(fold_num, model)
+    if results == None:
+      single_results = Results(fold_num, model)
+    else: 
+      single_results = results
     
     single_results = run_training(model,
                                   criterion,
