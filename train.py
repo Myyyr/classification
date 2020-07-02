@@ -142,7 +142,8 @@ def run_training(model,
             else:
                 model.eval()
                 
-            all_probas = np.zeros((len(dataloader)*dataloader.batch_size, model.n_classes))
+            # all_probas = np.zeros((len(dataloader)*dataloader.batch_size, model.n_classes))
+            all_probas  = np.zeros(len(dataloader)*dataloader.batch_size)
             all_targets = np.zeros(len(dataloader)*dataloader.batch_size)   
             running_loss = 0.0
             running_true_positives = 0
