@@ -274,15 +274,15 @@ def train(model,
     
     single_results = Results(fold_num, model)
     
-    # single_results = run_training(model,
-    #                               criterion,
-    #                               optimiser,
-    #                               num_epochs,
-    #                               dataloaders_dict,
-    #                               fold_num,
-    #                               scheduler,
-    #                               patience,
-    #                               single_results, 
-    #                               find_lr=find_lr)
+    single_results = run_training(model,
+                                  criterion,
+                                  optimiser,
+                                  num_epochs,
+                                  dataloaders_dict,
+                                  fold_num,
+                                  scheduler,
+                                  patience,
+                                  single_results, 
+                                  find_lr=find_lr)
        
     return single_results
