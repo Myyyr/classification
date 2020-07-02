@@ -40,8 +40,8 @@ def test(net, testloader, ltestset, nClasses = 10):
 
 def main():
 
-	trainloader, validloader = cifar10_data_loader.get_train_valid_loader('./data', BATCH_SIZE, TRUE, 1)
-	testloader, ltestset = get_test_loader('./data', BATCH_SIZE, shuffle=False)
+	trainloader, validloader = cifar10_data_loader.get_train_valid_loader('./data', BATCH_SIZE, True, 1)
+	testloader, ltestset = cifar10_data_loader.get_test_loader('./data', BATCH_SIZE, shuffle=False)
 
 
 
@@ -57,11 +57,11 @@ def main():
 
 	train_results = train.train(model,
 					          criterion,
-					          optimiser,
+					          optimizer,
 					          EPOCHS,
 					          {"train":trainloader, "dev":validloader},
 					          fold_num = 1,
-					          scheduler = train.get_scheduler(),
+					          scheduler = train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
 					          find_lr=False)
 	train.save_results(train_results, "./results") 

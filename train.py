@@ -150,8 +150,13 @@ def run_training(model,
             
                       
             for counter, data in enumerate(dataloader_iterator):
-                image_input = data["image"]
-                target_input = data["target"]
+                # print("counter :", counter)
+                # print("data type :", type(data))
+                # print("data len :", len(data))
+                # print("data[0] shape :", (data[0].shape))
+                # print("data[1] shape :", (data[1].shape))
+                image_input = data[0]
+                target_input = data[1]
                 
                 image_input = image_input.to(device, dtype=torch.float)
                 target_input = target_input.to(device, dtype=torch.long)
@@ -160,6 +165,7 @@ def run_training(model,
                 
                 raw_output = model(image_input) 
                 pred_probas = F.softmax(raw_output, dim=1)
+                # print("pred_probas :", pred_probas.shape)
                 _, preds = torch.max(pred_probas, 1)
                 
                 
@@ -177,9 +183,15 @@ def run_training(model,
                 results.results[phase].recall.append(recall)
                 results.results[phase].f1_scores.append(f1_score)
                         
-                batch_size = dataloader.batch_size
+                # print("preds :", preds.shape)
+                # batch_size = dataloader.batch_size
+                batch_size = target_input.shape[0]
                 all_targets[(counter*batch_size):((counter+1)*batch_size)] = target_input.cpu().detach().numpy()
                 all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()[:,1]
+
+                if batch_size != dataloader.batch_size:
+                  all_targets = all_targets[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
+                  all_probas = all_probas[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
                 
                 loss = criterion(raw_output, target_input)
                 # redo the average over mini_batch
@@ -194,8 +206,12 @@ def run_training(model,
                     optimiser.step()
                     if scheduler is not None:
                         scheduler.step()
+
+
+            # print("all_targets : ", np.unique(all_targets).shape)
+            # print("all_probas : ", np.unique(all_probas).shape)
             
-            epoch_auc_score = roc_auc_score(all_targets, all_probas)
+            epoch_auc_score = roc_auc_score(all_targets, all_probas, multi_class="ovr")
             results.results[phase].epoch_scores.append(epoch_auc_score)
             results.results[phase].memory.append(torch.cuda.max_memory_allocated())
             results.results[phase].time.append(time.time() - t0)
