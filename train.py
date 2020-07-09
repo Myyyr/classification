@@ -20,6 +20,7 @@ import tqdm as tq
 import time
 
 from EarlyStopping import EarlyStopping
+import torch.optim as optim
 
 def save_as_csv(series, name, path):
     df = pd.DataFrame(index=np.arange(len(series)), data=series, columns=[name])
@@ -190,7 +191,7 @@ def run_training(model,
 
             
             results.results[phase].epoch_scores.append(score)
-            results.results[phase].memory.append(torch.cuda.max_memory_allocated())
+            results.results[phase].memory.append(   convert_bytes(torch.cuda.max_memory_allocated()))
             results.results[phase].time.append(time.time() - t0)
             results.results[phase].precision.append(precision)
             results.results[phase].learning_rates.append(optimiser.state_dict()["param_groups"][0]["lr"])
@@ -272,3 +273,19 @@ def train(model,
                                   find_lr=find_lr)
        
     return single_results
+
+
+
+
+
+def convert_bytes(size, isbytes = True):
+  if isbytes :
+    b = 1000.0
+  else:
+    b = 1024.0    
+  for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+     if size < b:
+       return "%3.1f %s" % (size, x)
+     size /= b
+
+  return size
