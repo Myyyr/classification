@@ -13,34 +13,23 @@ from tqdm import tqdm
 
 import cifar10_data_loader
 import train
+import scheduler
 
-from config_resnet34_steplr import *
+from config_resnet18_moresimplesch import *
+import torch.backends.cudnn as cudnn
 
 
-def test(net, testloader, ltestset, nClasses = 10):
-	correct = 0
-	total = 0
-	
-	with tqdm(total=ltestset, desc=f'Epoch {1}/{1}', unit='img') as pbar:
-		for batch_idx, (inputs, targets) in enumerate(testloader):
-			inputs = inputs.cuda()
-			targets = targets.cuda()
+def get_n_parameters(net):
+    num_params = 0
+    for param in net.parameters():
+        num_params += param.numel()
+    return num_params
 
-			out = net(inputs)
-			_, predicted = torch.max(out.data, 1)
-			total += targets.size(0)
-			correct += predicted.eq(targets.data).cpu().sum()
-
-			
-			pbar.set_postfix(**{'Acc ': 100.*correct.numpy()/total})
-			pbar.update(BATCH_SIZE)
-
-		return 100.*correct.numpy()/total
 
 
 def main():
 
-	trainloader, validloader = cifar10_data_loader.get_train_valid_loader('./data', BATCH_SIZE, True, 1)
+	trainloader, validloader = cifar10_data_loader.get_train_valid_loader('./data', BATCH_SIZE, True, 1, 0.2)
 	testloader, ltestset = cifar10_data_loader.get_test_loader('./data', BATCH_SIZE, shuffle=False)
 
 
@@ -50,7 +39,12 @@ def main():
 	in_shape = [3, 32, 32]
 
 	model = MODEL
-	model.cuda()
+	print("Number of model's parameter :", get_n_parameters(model))
+	device = 'cuda'
+	model.to(device)
+	model = torch.nn.DataParallel(model)
+	cudnn.benchmark = True
+	# model.cuda()
 	criterion = nn.CrossEntropyLoss()
 	optimizer = optim.SGD(model.parameters(), lr=LR,
                       momentum=MOMENTUM, weight_decay=W_DECAY)
@@ -61,8 +55,11 @@ def main():
 					          EPOCHS,
 					          {"train":trainloader, "dev":validloader},
 					          fold_num = FOLD,
-					          scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), #torch.optim.lr_scheduler.StepLR(optimizer, step_size=STEPSIZE, gamma=GAMMA),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = PATIENCE,
+					          LR = LR,
+					          MOMENTUM = MOMENTUM,
+					          W_DECAY = W_DECAY,
 					          find_lr=False)
 	train.save_results({FOLD:train_results}, "./results") 
 
@@ -72,11 +69,16 @@ def main():
 					          1,
 					          {"test":testloader},
 					          fold_num = FOLD,
-					          scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), #torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
 					          patience = 4,
+					          LR =LR,
+					          MOMENTUM =MOMENTUM,
+					          W_DECAY =W_DECAY,
 					          find_lr=False,
 					          results=train_results)
-	train.save_results({FOLD:test_results}, "./results") 
+	train.save_results({FOLD:test_results}, "./results")
+
+	
 
 	
 def convert_bytes(size, isbytes = True):

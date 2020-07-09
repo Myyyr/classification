@@ -43,9 +43,7 @@ def save_results(results, foldername):
             epoch_losses = results[fold].results[phase].epoch_losses
             epoch_scores = results[fold].results[phase].epoch_scores
             lr_rates = results[fold].results[phase].learning_rates
-            f1_scores = results[fold].results[phase].f1_scores
             precision = results[fold].results[phase].precision
-            recall = results[fold].results[phase].recall
             memory = results[fold].results[phase].memory
             tmp = results[fold].results[phase].time
 
@@ -53,12 +51,10 @@ def save_results(results, foldername):
             save_as_csv(losses, phase + "_losses", base_dir)
             save_as_csv(epoch_losses, phase + "_epoch_losses", base_dir)
             save_as_csv(epoch_scores, phase + "_epoch_scores", base_dir)
-            save_as_csv(lr_rates, phase + "_lr_rates", base_dir)
-            save_as_csv(f1_scores, phase + "_f1_scores", base_dir)
-            save_as_csv(precision, phase + "_precision", base_dir)
-            save_as_csv(recall, phase + "_recall", base_dir)
-            save_as_csv(memory, phase + "_memory", base_dir)
-            save_as_csv(tmp, phase + "_time", base_dir)
+            save_as_csv(lr_rates, phase + "epoch_lr_rates", base_dir)
+            save_as_csv(precision, phase + "epoch_precision", base_dir)
+            save_as_csv(memory, phase + "epoch_memory", base_dir)
+            save_as_csv(tmp, phase + "epoch_time", base_dir)
 
 
 class ResultsBean:
@@ -66,8 +62,6 @@ class ResultsBean:
     def __init__(self):
         
         self.precision = []
-        self.recall = []
-        self.f1_scores = []
         self.losses = []
         self.learning_rates = []
         self.epoch_losses = []
@@ -120,21 +114,28 @@ def run_training(model,
                  scheduler,
                  patience,
                  results,
+                 LR,
+                 MOMENTUM,
+                 W_DECAY,
                  find_lr):
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     phases = dataloaders_dict.keys()
-    best_auc = 0
-    patience_counter = 0
-    epsilon = 1e-7
+
     t0 = time.time()
 
     early_stop = EarlyStopping(patience)
     break_training = False
+    best_acc = 0
+
     for epoch in range(num_epochs):
         
         for phase in phases:
+            train_loss = 0
+            correct = 0
+            total = 0
+            running_loss = 0
             
             dataloader = dataloaders_dict[phase]
             dataloader_iterator = tqdm(dataloader, total=int(len(dataloader)))
@@ -144,22 +145,8 @@ def run_training(model,
             else:
                 model.eval()
                 
-            # all_probas = np.zeros((len(dataloader)*dataloader.batch_size, model.n_classes))
-            all_probas  = np.zeros(len(dataloader)*dataloader.batch_size)
-            all_targets = np.zeros(len(dataloader)*dataloader.batch_size)   
-            running_loss = 0.0
-            running_true_positives = 0
-            running_false_positives = 0
-            running_false_negatives = 0
-            
-            
-                      
+   
             for counter, data in enumerate(dataloader_iterator):
-                # print("counter :", counter)
-                # print("data type :", type(data))
-                # print("data len :", len(data))
-                # print("data[0] shape :", (data[0].shape))
-                # print("data[1] shape :", (data[1].shape))
                 image_input = data[0]
                 target_input = data[1]
                 
@@ -169,37 +156,19 @@ def run_training(model,
                 optimiser.zero_grad()
                 
                 raw_output = model(image_input) 
-                pred_probas = F.softmax(raw_output, dim=1)
-                #print("pred_probas :", pred_probas.shape)
-                _, preds = torch.max(pred_probas, 1)
-                
-                
-                running_true_positives += (preds*target_input).sum().cpu().detach().numpy()
-                running_false_positives += ((1-target_input)*preds).sum().cpu().detach().numpy()
-                running_false_negatives += (target_input*(1-preds)).sum().cpu().detach().numpy()
+                _, preds = raw_output.max(1)
 
-                precision = running_true_positives/ (running_true_positives + running_false_positives + epsilon)
-                recall = running_true_positives/ (running_true_positives + running_false_negatives + epsilon)
-                f1_score = 2*precision*recall/ (precision+recall+epsilon) 
+                total += target_input.size(0)
+                correct += preds.eq(target_input).sum().item()
                 
                 
-                results.results[phase].learning_rates.append(optimiser.state_dict()["param_groups"][0]["lr"])
-                results.results[phase].precision.append(precision)
-                results.results[phase].recall.append(recall)
-                results.results[phase].f1_scores.append(f1_score)
-                        
-                # print("preds :", preds.shape)
-                # batch_size = dataloader.batch_size
+                
+              
                 batch_size = target_input.shape[0]
-                all_targets[(counter*batch_size):((counter+1)*batch_size)] = target_input.cpu().detach().numpy()
-                # all_probas[(counter*batch_size):((counter+1)*batch_size)] = pred_probas.cpu().detach().numpy()#[:,1]
-                all_probas[(counter*batch_size):((counter+1)*batch_size)] = preds.cpu().detach().numpy()
-
-                if batch_size != dataloader.batch_size:
-                  all_targets = all_targets[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
-                  all_probas = all_probas[:((len(dataloader)-1)*dataloader.batch_size + batch_size)]
+                
                 
                 loss = criterion(raw_output, target_input)
+                del raw_output
                 # redo the average over mini_batch
                 running_loss += (loss.item() * batch_size)
     
@@ -214,44 +183,47 @@ def run_training(model,
                         scheduler.step()
 
 
-            # print("all_targets : ", np.unique(all_targets))
-            # print("all_probas : ", np.unique(all_probas))
-            
-            # print("all_targets : ", all_targets.shape)
-            # print("all_probas : ", all_probas.shape)
+
+            precision = 100.*correct/total
+            score  = precision
+           
 
             
-            # epoch_auc_score = log_loss(all_targets, all_probas) #roc_auc_score(all_targets, all_probas, multi_class="ovr")
-            epoch_auc_score = np.sum((all_targets == all_probas)*1)/all_targets.shape[0]
-            results.results[phase].epoch_scores.append(epoch_auc_score)
+            results.results[phase].epoch_scores.append(score)
             results.results[phase].memory.append(torch.cuda.max_memory_allocated())
             results.results[phase].time.append(time.time() - t0)
-                
+            results.results[phase].precision.append(precision)
+            results.results[phase].learning_rates.append(optimiser.state_dict()["param_groups"][0]["lr"])
             
             # average over all samples to obtain the epoch loss
             epoch_loss = running_loss / len(dataloader.dataset)
             results.results[phase].epoch_losses.append(epoch_loss)
             
             print("fold: {}, epoch: {}, phase: {}, e-loss: {}, prec: {}".format(
-                fold_num, epoch, phase, epoch_loss, epoch_auc_score))
+                fold_num, epoch, phase, epoch_loss, score))
             
             if not find_lr:
                 if phase == "dev":
-                    # if epoch_auc_score >= best_auc:
-                    #     best_auc = epoch_auc_score
-                    #     best_model_wts = copy.deepcopy(model.state_dict())
-                    # else:
-                    #     patience_counter += 1
-                    #     if patience_counter == patience:
-                    #         print("Model hasn't improved for {} epochs. Training finished.".format(patience))
-                    #         break
-                    early_stop(-epoch_auc_score, model)
-                    if not early_stop.early_stop:
-                      best_model_wts = copy.deepcopy(model.state_dict())
+                    early_stop(-score, model)
+                    if not early_stop.early_stop :
+                      if precision >= best_acc:
+                        best_model = {'state' : copy.deepcopy(model.state_dict()),
+                                      'epoch' : epoch}
+                        best_acc = precision
+
                     else:
-                      print("Model hasn't improved for {} epochs. Training finished.".format(patience))
-                      break_training = True
-                      break
+                      if not scheduler.end:
+                        early_stop.early_stop = False
+                        early_stop.counter = 0
+                        scheduler.update_lr()
+                        print("Model hasn't improved for {} epochs. LR updated.".format(patience))
+                        model.load_state_dict(best_model['state'])
+                        optimizer = optim.SGD(model.parameters(), lr=LR,
+                                  momentum=MOMENTUM, weight_decay=W_DECAY)
+                      else:
+                        print("Model hasn't improved for {} epochs. Training finished.".format(patience))
+                        break_training = True
+                        break
 
 
         if break_training:
@@ -260,7 +232,7 @@ def run_training(model,
                
     # load best model weights
     if not find_lr and "test" not in phases:
-        model.load_state_dict(best_model_wts)
+        model.load_state_dict(best_model['state'])
     
     results.model = model
     return results
@@ -274,6 +246,9 @@ def train(model,
           fold_num,
           scheduler,
           patience,
+          LR,
+          MOMENTUM,
+          W_DECAY,
           find_lr=False,
           results = None):
     
@@ -291,6 +266,9 @@ def train(model,
                                   scheduler,
                                   patience,
                                   single_results, 
+                                  LR,
+                                  MOMENTUM,
+                                  W_DECAY,
                                   find_lr=find_lr)
        
     return single_results

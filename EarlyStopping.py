@@ -25,6 +25,8 @@ class EarlyStopping:
         self.path = path
 
     def __call__(self, val_loss, model):
+        if self.patience == -1:
+            return None
 
         score = -val_loss
 
