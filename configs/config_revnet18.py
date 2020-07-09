@@ -1,7 +1,5 @@
-import sys
-sys.path.append("../models")
-import RevNet
-
+import ResNet
+from GenModel import GenModel
 
 BATCH_SIZE = 128
 N_WORKERS = 2
@@ -16,6 +14,6 @@ MOMENTUM = 0.9#0.9
 
 LRS = [0.1,0.01,0.001]
 
-MODEL = RevNet.RevNet18()
+MODEL = ResNet.ResNet18()
 
 FOLD = "resnet18-MSSch"
