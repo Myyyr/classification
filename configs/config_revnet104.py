@@ -15,6 +15,6 @@ MOMENTUM = 0.9#0.9
 
 LRS = [0.1,0.01,0.001]
 
-MODEL = RevNet.RevNe104()
+MODEL = RevNet.RevNet104()
 
 FOLD = "revnet104"
