@@ -17,4 +17,4 @@ LRS = [1,0.1, 0.01, 0.001, 0.0001]
 
 MODEL = RevNet.RevNet18()
 
-FOLD = "revnet18"
+FOLD = "revnet18_morelr"
