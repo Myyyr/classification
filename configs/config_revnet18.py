@@ -8,7 +8,8 @@ N_WORKERS = 2
 
 EPOCHS = 500
 #PATIENCE = 30 
-PATIENCE = 5
+# PATIENCE = 5
+PATIENCE = 30 
 
 LR = 0.1
 W_DECAY = 5e-4#2e-4
@@ -23,4 +24,4 @@ def SCHEDULER(optimizer):
 
 MODEL = RevNet.RevNet18()
 
-FOLD = "revnet18_trianglelr"
+FOLD = "revnet18_trianglelr_patiencemore"
