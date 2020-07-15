@@ -11,7 +11,7 @@ import sys
 import time
 from tqdm import tqdm
 
-import cifar10_data_loader
+# import cifar10_data_loader
 import train
 import scheduler
 
@@ -30,8 +30,8 @@ def get_n_parameters(net):
 
 def main():
 
-	trainloader, validloader = cifar10_data_loader.get_train_valid_loader('./data', BATCH_SIZE, True, 1, 0.2)
-	testloader, ltestset = cifar10_data_loader.get_test_loader('./data', BATCH_SIZE, shuffle=False)
+	trainloader, validloader = get_train_valid_loader('./data', BATCH_SIZE, True, 1, 0.2)
+	testloader, ltestset = get_test_loader('./data', BATCH_SIZE, shuffle=False)
 
 
 
@@ -56,7 +56,7 @@ def main():
 					          EPOCHS,
 					          {"train":trainloader, "dev":validloader},
 					          fold_num = FOLD,
-					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), #torch.optim.lr_scheduler.StepLR(optimizer, step_size=STEPSIZE, gamma=GAMMA),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), 
 					          patience = PATIENCE,
 					          LR = LR,
 					          MOMENTUM = MOMENTUM,
@@ -70,7 +70,7 @@ def main():
 					          1,
 					          {"test":testloader},
 					          fold_num = FOLD,
-					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), #torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1),#train.get_scheduler(optimizer, MIN_LR, MAX_LR, STEPSIZE),
+					          scheduler = scheduler.MoreSimpleScheduler(optimizer = optimizer, lrs = LRS), 
 					          patience = 4,
 					          LR =LR,
 					          MOMENTUM =MOMENTUM,
@@ -112,6 +112,8 @@ def import_config(path):
 
 	globals().update({name: getattr(module, name) for name in all_names})
 
+	return
+
 
 if __name__ == '__main__':
 	import  argparse
@@ -119,8 +121,11 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='CNN Classif Training Function')
 
 	parser.add_argument('-c', '--config',  help='training config file', required=True)
+	parser.add_argument('-d', '--dataset',  help='dataset to use', required=False, default = "cifar10_data_loader.py")
 
 	import_config(parser.parse_args().config)
+	import_config(parser.parse_args().dataset)
+
 
 	main()
 
