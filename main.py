@@ -18,7 +18,7 @@ import scheduler
 import torch.backends.cudnn as cudnn
 
 
-from configs.config_revnet18 import *
+# from configs.config_revnet18 import *
 
 def get_n_parameters(net):
     num_params = 0
@@ -101,8 +101,27 @@ def convert_bytes(size, isbytes = True):
 # 		f.close()
 
 
-if __name__ == '__main__':
-	main()
+def import_config(path):
+	path = path.replace("/",".")
+	path = path.replace(".py","")
+	module = __import__(path, fromlist=['*'])
+	if hasattr(module, '__all__'):
+	    all_names = module.__all__
+	else:
+	    all_names = [name for name in dir(module) if not name.startswith('_')]
 
+	globals().update({name: getattr(module, name) for name in all_names})
+
+
+if __name__ == '__main__':
+	import  argparse
+
+	parser = argparse.ArgumentParser(description='CNN Classif Training Function')
+
+	parser.add_argument('-c', '--config',  help='training config file', required=True)
+
+	import_config(parser.parse_args().config)
+
+	main()
 
 
