@@ -79,12 +79,12 @@ def get_train_valid_loader(data_dir,
 
     # load the dataset
     train_dataset = datasets.VOCDetection(
-        root=data_dir, train=True, year='2012',
+        root=data_dir, split='train', year='2012',
         download=True, transform=train_transform,
     )
 
     valid_dataset = datasets.VOCDetection(
-        root=data_dir, train=True, year='2012',
+        root=data_dir, split='val', year='2012',
         download=True, transform=valid_transform,
     )
 
@@ -157,7 +157,7 @@ def get_test_loader(data_dir,
                                           ])
 
     dataset = datasets.VOCDetection(
-        root=data_dir, train=False, year='2012',
+        root=data_dir, split='test', year='2012',
         download=True, transform=transform,
     )
 
