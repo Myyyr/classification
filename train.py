@@ -180,10 +180,14 @@ def run_training(model,
                 if phase == 'train':
                     loss.backward()
                     optimiser.step()
-                    if scheduler is not None:
-                        scheduler.step()
+                    # if scheduler is not None:
+                    #     scheduler.step()
 
-
+            if phase == 'train':
+                # loss.backward()
+                # optimiser.step()
+                if scheduler is not None:
+                    scheduler.step()
 
             precision = 100.*correct/total
             score  = precision

@@ -6,7 +6,7 @@ import numpy as np
 
 class SimpleScheduler():
 
-	def __init__(self, optimizer, epochs, lrs, iter_per_epoch):
+	def __init__(self, optimizer, epochs, lrs):
 		super(SimpleScheduler, self).__init__()
 
 		if len(epochs) != len(lrs):
@@ -17,15 +17,11 @@ class SimpleScheduler():
 		self.Optimizer = optimizer
 		self.epochs = epochs
 		self.lrs = lrs
-		self.iter_per_epoch = iter_per_epoch
 
-		self.iter = 0
 		self.ep = 0
 
 	def update_epoch(self):
-		if self.iter == self.iter_per_epoch:
-			self.iter == 0
-			self.ep += 1
+		self.ep += 1
 
 	def update_lr(self):
 		for i in range(self.n_steps):
@@ -36,7 +32,6 @@ class SimpleScheduler():
 		self.update_lr()
 		self.update_epoch()
 
-		self.iter += 1
 		
 
 
