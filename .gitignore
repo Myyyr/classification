@@ -8,6 +8,7 @@ __pycache__/
 checkpoints/
 checkpoints_2/
 results/
+checkpoint.pt
 
 # C extensions
 *.so
