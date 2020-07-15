@@ -1,6 +1,6 @@
 import models.RevNet as RevNet
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '1' 
+os.environ["CUDA_VISIBLE_DEVICES"] = '2' 
 
 BATCH_SIZE = 128
 N_WORKERS = 2
