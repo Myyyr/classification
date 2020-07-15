@@ -158,8 +158,8 @@ def RevNet50():
     return RevNet(Bottleneck, [3, 4, 6, 3])
 
 
-def RevNet101():
-    return RevNet(Bottleneck, [3, 4, 23, 3])
+def RevNet104():
+    return RevNet(Bottleneck, [2, 3, 10, 2])#[3, 4, 23, 3]) # = 33
 
 
 def RevNet152():
