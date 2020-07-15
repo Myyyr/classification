@@ -53,7 +53,7 @@ class BasicBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    expansion = 2
+    expansion = 4
 
     def __init__(self, in_planes, planes, stride=1):
         super(Bottleneck, self).__init__()
@@ -87,9 +87,9 @@ class Bottleneck(nn.Module):
 
 
 class RevNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, num_classes=10, channels = [64*2, 128*2, 256*2, 512*2]):
         super(RevNet, self).__init__()
-        self.channels = [64*2, 128*2, 256*2, 512*2]
+        self.channels = channels#[64*2, 128*2, 256*2, 512*2]
         self.in_planes = self.channels[0]
 
         self.conv1 = nn.Conv2d(3, self.channels[0], kernel_size=3,
@@ -161,8 +161,8 @@ def RevNet50():
     return RevNet(Bottleneck, [3, 4, 6, 3])
 
 
-def RevNet104():
-    return RevNet(Bottleneck, [2, 3, 10, 2])#[3, 4, 23, 3]) # = 33
+def RevNet104(channels):
+    return RevNet(Bottleneck, [2, 3, 10, 2], channels = channels)#[3, 4, 23, 3]) # = 33
 
 
 def RevNet152():
