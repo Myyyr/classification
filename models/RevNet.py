@@ -102,7 +102,7 @@ class RevNet(nn.Module):
 
         self.bn2  = nn.BatchNorm2d(self.channels[3])
         self.relu = nn.ReLU() 
-        self.linear = nn.Linear(self.channels[3]*block.expansion, num_classes)
+        self.linear = nn.Linear(self.channels[3], num_classes)
 
 
     def _make_layer(self, block, planes, num_blocks, down):
