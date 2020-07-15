@@ -6,7 +6,7 @@ import torch.optim as optim
 BATCH_SIZE = 32
 N_WORKERS = 4
 
-EPOCHS = 350
+EPOCHS = 15
 PATIENCE = -1
 
 LR = 0.1

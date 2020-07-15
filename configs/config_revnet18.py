@@ -1,6 +1,6 @@
 import models.RevNet as RevNet
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '2' 
+os.environ["CUDA_VISIBLE_DEVICES"] = '3' 
 import scheduler
 
 BATCH_SIZE = 128
@@ -23,4 +23,4 @@ def SCHEDULER(optimizer):
 
 MODEL = RevNet.RevNet18()
 
-FOLD = "revnet18_morelr"
+FOLD = "revnet18_trianglelr"
