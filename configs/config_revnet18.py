@@ -7,14 +7,16 @@ BATCH_SIZE = 128
 N_WORKERS = 2
 
 EPOCHS = 500
-PATIENCE = 30
+#PATIENCE = 30 
+PATIENCE = 5
 
 LR = 0.1
 W_DECAY = 5e-4#2e-4
 MOMENTUM = 0.9#0.9
 
 
-LRS = [1,0.1, 0.01, 0.001, 0.0001]
+# LRS = [1,0.1, 0.01, 0.001, 0.0001] # fold = revnet18_morelr
+LRS = [0.0001, 0.001, 0.01, 0.1, 0.01, 0.001, 0.0001]
 
 def SCHEDULER(optimizer):
 	return scheduler.MoreSimpleScheduler(optimizer, LRS)
