@@ -79,12 +79,12 @@ def get_train_valid_loader(data_dir,
 
     # load the dataset
     train_dataset = datasets.VOCDetection(
-        root=data_dir, split='train', year='2012',
+        root=data_dir, image_set='train', year='2012',
         download=True, transform=train_transform,
     )
 
     valid_dataset = datasets.VOCDetection(
-        root=data_dir, split='train', year='2012',
+        root=data_dir, image_set='trainval', year='2012',
         download=True, transform=valid_transform,
     )
 
@@ -101,11 +101,11 @@ def get_train_valid_loader(data_dir,
     valid_sampler = SubsetRandomSampler(valid_idx)
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size, sampler=train_sampler,
+        train_dataset, batch_size=batch_size,
         num_workers=num_workers, pin_memory=pin_memory,
     )
     valid_loader = torch.utils.data.DataLoader(
-        valid_dataset, batch_size=batch_size, sampler=valid_sampler,
+        valid_dataset, batch_size=batch_size,
         num_workers=num_workers, pin_memory=pin_memory,
     )
 
@@ -157,7 +157,7 @@ def get_test_loader(data_dir,
                                           ])
 
     dataset = datasets.VOCDetection(
-        root=data_dir, split='test', year='2012',
+        root=data_dir, image_set='val', year='2012',
         download=True, transform=transform,
     )
 
