@@ -15,9 +15,10 @@ import cifar10_data_loader
 import train
 import scheduler
 
-from config_resnet18_moresimplesch import *
 import torch.backends.cudnn as cudnn
 
+
+from configs.config_revnet18 import *
 
 def get_n_parameters(net):
     num_params = 0

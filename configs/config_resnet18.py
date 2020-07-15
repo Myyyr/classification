@@ -1,6 +1,4 @@
-import sys
-sys.path.append("../models")
-import RevNet
+
 
 
 BATCH_SIZE = 128

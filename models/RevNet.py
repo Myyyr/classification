@@ -86,19 +86,20 @@ class Bottleneck(nn.Module):
 class RevNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=10):
         super(RevNet, self).__init__()
-        self.in_planes = 64
+        self.channels = [64*2, 128*2, 256*2, 512*2]
+        self.in_planes = self.channels[0]
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+        self.conv1 = nn.Conv2d(3, self.channels[0], kernel_size=3,
                                stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
-        self.layer1 = self._make_layer(block, 64 , num_blocks[0], [])
-        self.layer2 = self._make_layer(block, 128, num_blocks[1], [torch.nn.AvgPool2d(2,2), pad((128 - 64 )//2)])
-        self.layer3 = self._make_layer(block, 256, num_blocks[2], [torch.nn.AvgPool2d(2,2), pad((256 - 128)//2)])
-        self.layer4 = self._make_layer(block, 512, num_blocks[3], [torch.nn.AvgPool2d(2,2), pad((512 - 256)//2)])
+        self.bn1 = nn.BatchNorm2d(self.channels[0])
+        self.layer1 = self._make_layer(block, self.channels[0] , num_blocks[0], [])
+        self.layer2 = self._make_layer(block, self.channels[1], num_blocks[1], [torch.nn.AvgPool2d(2,2), pad((self.channels[1] - self.channels[0] )//2)])
+        self.layer3 = self._make_layer(block, self.channels[2], num_blocks[2], [torch.nn.AvgPool2d(2,2), pad((self.channels[2] - self.channels[1])//2)])
+        self.layer4 = self._make_layer(block, self.channels[3], num_blocks[3], [torch.nn.AvgPool2d(2,2), pad((self.channels[3] - self.channels[2])//2)])
 
-        self.bn2  = nn.BatchNorm2d(512)
+        self.bn2  = nn.BatchNorm2d(self.channels[3])
         self.relu = nn.ReLU() 
-        self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.linear = nn.Linear(self.channels[3]*block.expansion, num_classes)
 
 
     def _make_layer(self, block, planes, num_blocks, down):
@@ -146,7 +147,7 @@ class RevNet(nn.Module):
 
 
 def RevNet18():
-    return RevNet(BasicBlock, [2, 2, 2, 2])
+    return RevNet(BasicBlock, [1, 1, 1, 1])
 
 
 def RevNet34():
