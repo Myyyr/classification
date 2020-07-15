@@ -151,7 +151,7 @@ def RevNet18():
 
 
 def RevNet34():
-    return RevNet(BasicBlock, [3, 4, 6, 3])
+    return RevNet(BasicBlock, [2, 2, 3, 1])
 
 
 def RevNet50():
