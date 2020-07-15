@@ -1,6 +1,6 @@
 import models.RevNet as RevNet
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '2' 
+os.environ["CUDA_VISIBLE_DEVICES"] = '2' # 3 > c2 
 import scheduler
 
 BATCH_SIZE = 128
