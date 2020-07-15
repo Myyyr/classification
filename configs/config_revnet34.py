@@ -3,7 +3,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = '3' 
 
 BATCH_SIZE = 128
-N_WORKERS = 16
+N_WORKERS = 4
 
 EPOCHS = 350
 PATIENCE = 30
