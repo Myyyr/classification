@@ -1,6 +1,6 @@
 import models.RevNet as RevNet
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '2' # 3 > c2
+os.environ["CUDA_VISIBLE_DEVICES"] = '3' # 3 > c2
 # 2 > c1 
 import scheduler
 
@@ -20,13 +20,14 @@ MOMENTUM = 0.9#0.9
 # LRS = [1,0.1, 0.01, 0.001, 0.0001] # fold = revnet18_morelr
 # LRS = [0.0001, 0.001, 0.01, 0.1, 0.01, 0.001, 0.0001]
 
-LRS = [0.1, 0.02, 0.004, 0.0008]
-LR_EPOCH = [60, 120, 160, 200]
+# LRS = [0.1, 0.02, 0.004, 0.0008]
+# LR_EPOCH = [60, 120, 160, 200]
 
 def SCHEDULER(optimizer):
 	#return scheduler.MoreSimpleScheduler(optimizer, LRS)
-	return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
+	#return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
+	return optim.lr_scheduler.CosineAnnealingLR(optimizer, 12, eta_min=0, last_epoch=-1)
 
 MODEL = RevNet.RevNet18()
 
-FOLD = "revnet18_ssc"
+FOLD = "revnet18_callr"
