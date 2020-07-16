@@ -164,6 +164,9 @@ def RevNet50():
 def RevNet104(channels):
     return RevNet(Bottleneck, [2, 3, 10, 2], channels = channels)#[3, 4, 23, 3]) # = 33
 
+def RevNet102bsc():
+    return RevNet(BasicBlock, [2, 5, 15, 3])
+
 
 def RevNet152():
     return RevNet(Bottleneck, [3, 8, 36, 3])
