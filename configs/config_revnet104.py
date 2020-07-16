@@ -18,8 +18,11 @@ MOMENTUM = 0.9#0.9
 LRS = [0.1, 0.02, 0.004, 0.0008]
 LR_EPOCH = [60, 120, 160, 200]
 
+exp = 8
+MODEL = RevNet.RevNet104([64*exp, 128*exp, 256*exp, 512*exp])
 
-MODEL = RevNet.RevNet104()
+
+# MODEL = RevNet.RevNet104()
 
 def SCHEDULER(optimizer):
 	return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
