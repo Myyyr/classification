@@ -3,6 +3,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = '3' # 3 > c2
 # 2 > c1 
 import scheduler
+import torch.optim as optim
 
 BATCH_SIZE = 128
 N_WORKERS = 2
