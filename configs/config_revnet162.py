@@ -26,4 +26,4 @@ MODEL = RevNet.RevNet162()
 def SCHEDULER(optimizer):
 	return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
 
-FOLD = "revnet98"
+FOLD = "revnet162"
