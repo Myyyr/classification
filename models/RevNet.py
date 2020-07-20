@@ -154,7 +154,16 @@ def RevNet18():
 
 
 def RevNet34():
-    return RevNet(BasicBlock, [2, 2, 3, 1])
+    return RevNet(BasicBlock, [2, 2, 3, 1]) # (2_conv)*2_chan*8_bloc + 2_se
+
+def RevNet48():
+    return RevNet(BasicBlock, [3, 3, 3, 3]) # (2_conv)*2_chan*12_bloc + 2_se
+
+def RevNet98():
+    return RevNet(BasicBlock, [6, 6, 6, 6]) # (2_conv)*2_chan*24_bloc + 2_se
+
+def RevNet162():
+    return RevNet(BasicBlock, [10, 10, 10, 10]) # (2_conv)*2_chan*160_bloc + 2_se
 
 
 def RevNet50():
