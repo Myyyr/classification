@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import revtorch as rv
+from models.group_norm  import GroupNorm2d
 
 class pad(nn.Module):
     def __init__(self, size):
@@ -23,6 +24,80 @@ class pad(nn.Module):
         x = self.zpad(x)
         x = x.permute((0,3,2,1))
         return x
+
+
+def norm2d(planes, num_channels_per_group=32):
+    print("num_channels_per_group:{}".format(num_channels_per_group))
+    if num_channels_per_group > 0:
+        return GroupNorm2d(planes, num_channels_per_group, affine=True,
+                           track_running_stats=False)
+    else:
+        return nn.BatchNorm2d(planes)
+
+def conv3x3(in_planes, out_planes, stride=1):
+    """3x3 convolution with padding"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=1, bias=False)
+
+class BasicBlockGN(nn.Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1,
+                 group_norm=0):
+        super(BasicBlockGN, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = norm2d(planes, group_norm)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = norm2d(planes, group_norm)
+        # self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        # residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        # if self.downsample is not None:
+        #     residual = self.downsample(x)
+
+        # out += residual
+        out = self.relu(out)
+
+        return out
+
+
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, in_planes, planes, stride=1):
+        super(BasicBlock, self).__init__()
+        self.conv1 = nn.Conv2d(
+            in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3,
+                               stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_planes != self.expansion*planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, self.expansion*planes,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(self.expansion*planes)
+            )
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += self.shortcut(x)
+        out = F.relu(out)
+        return out
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -159,8 +234,19 @@ def RevNet34():
 def RevNet48():
     return RevNet(BasicBlock, [3, 3, 3, 3]) # (2_conv)*2_chan*12_bloc + 2_se
 
+def RevNet48GN(group_norm=8):
+    def block(inplanes, planes, stride=1):
+        return BasicBlockGN(inplanes, planes, stride=stride, group_norm = group_norm)
+    return RevNet(block, [3, 3, 3, 3]) # (2_conv)*2_chan*12_bloc + 2_se
+
+
 def RevNet98():
     return RevNet(BasicBlock, [6, 6, 6, 6]) # (2_conv)*2_chan*24_bloc + 2_se
+
+def RevNet98GN(group_norm=8):
+    def block(inplanes, planes, stride=1):
+        return BasicBlockGN(inplanes, planes, stride=stride, group_norm = group_norm)
+    return RevNet(block, [6, 6, 6, 6]) # (2_conv)*2_chan*12_bloc + 2_se
 
 def RevNet162():
     return RevNet(BasicBlock, [10, 10, 10, 10]) # (2_conv)*2_chan*160_bloc + 2_se
