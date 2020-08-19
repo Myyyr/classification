@@ -1,7 +1,8 @@
 import models.RevNet as RevNet
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '3' 
 import scheduler
-os.environ["CUDA_VISIBLE_DEVICES"] = '1' 
+
 
 BATCH_SIZE = 128
 N_WORKERS = 4
@@ -14,16 +15,12 @@ W_DECAY = 5e-4#2e-4
 MOMENTUM = 0.9#0.9
 
 
-# LRS = [0.1,0.01,0.001]
 LRS = [0.1, 0.02, 0.004, 0.0008]
 LR_EPOCH = [60, 120, 160, 200]
-
-MODEL = RevNet.RevNet48GN(group_norm=32)
-
-
-# MODEL = RevNet.RevNet104()
 
 def SCHEDULER(optimizer):
 	return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
 
-FOLD = "revnet48_gn32"
+MODEL = RevNet.RevNet18(num_classes=100)
+
+FOLD = "revnet18_cifar100"
