@@ -224,15 +224,15 @@ class RevNet(nn.Module):
         return out
 
 
-def RevNet18():
-    return RevNet(BasicBlock, [1, 1, 1, 1])
+def RevNet18(num_classes=10):
+    return RevNet(BasicBlock, [1, 1, 1, 1], num_classes=num_classes)
 
 
-def RevNet34():
-    return RevNet(BasicBlock, [2, 2, 3, 1]) # (2_conv)*2_chan*8_bloc + 2_se
+def RevNet34(num_classes=10):
+    return RevNet(BasicBlock, [2, 2, 3, 1], num_classes=num_classes) # (2_conv)*2_chan*8_bloc + 2_se
 
-def RevNet48():
-    return RevNet(BasicBlock, [3, 3, 3, 3]) # (2_conv)*2_chan*12_bloc + 2_se
+def RevNet48(num_classes=10):
+    return RevNet(BasicBlock, [3, 3, 3, 3], num_classes=num_classes) # (2_conv)*2_chan*12_bloc + 2_se
 
 def RevNet48GN(group_norm=8):
     def block(inplanes, planes, stride=1):
