@@ -240,16 +240,16 @@ def RevNet48GN(group_norm=8):
     return RevNet(block, [3, 3, 3, 3]) # (2_conv)*2_chan*12_bloc + 2_se
 
 
-def RevNet98():
-    return RevNet(BasicBlock, [6, 6, 6, 6]) # (2_conv)*2_chan*24_bloc + 2_se
+def RevNet98(num_classes=10):
+    return RevNet(BasicBlock, [6, 6, 6, 6], num_classes=num_classes) # (2_conv)*2_chan*24_bloc + 2_se
 
 def RevNet98GN(group_norm=8):
     def block(inplanes, planes, stride=1):
         return BasicBlockGN(inplanes, planes, stride=stride, group_norm = group_norm)
     return RevNet(block, [6, 6, 6, 6]) # (2_conv)*2_chan*12_bloc + 2_se
 
-def RevNet162():
-    return RevNet(BasicBlock, [10, 10, 10, 10]) # (2_conv)*2_chan*160_bloc + 2_se
+def RevNet162(num_classes=10):
+    return RevNet(BasicBlock, [10, 10, 10, 10],num_classes=num_classes) # (2_conv)*2_chan*160_bloc + 2_se
 
 
 def RevNet50():
