@@ -111,6 +111,8 @@ def ResNet18(num_classes = 10):
 def ResNet34():
     return ResNet(BasicBlock, [3, 4, 6, 3])
 
+def ResNet48():
+    return ResNet(BasicBlock, [5, 6, 7, 5])
 
 def ResNet50():
     return ResNet(Bottleneck, [3, 4, 6, 3])
