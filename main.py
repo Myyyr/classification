@@ -79,6 +79,8 @@ def main():
 					          results=train_results)
 	train.save_results({FOLD:test_results}, "./results")
 
+	print("Memory used :", convert_bytes(torch.cuda.max_memory_allocated()))
+
 	
 
 	
@@ -120,16 +122,20 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='CNN Classif Training Function')
 
-	# parser.add_argument('-c', '--config',  help='training config file', required=True)
+	parser.add_argument('-c', '--config',  help='training config file', required=True)
 	parser.add_argument('-d', '--dataset',  help='dataset to use', required=False, default = "cifar10_data_loader.py")
 
 
-	for c in ["configs/config_resnet10", "configs/config_resnet12", "configs/config_resnet14", "configs/config_resnet16"]:
+	# for c in ["configs/config_resnet10", "configs/config_resnet12", "configs/config_resnet14", "configs/config_resnet16"]:
 		# import_config(parser.parse_args().config)
 		# import_config(parser.parse_args().dataset)
 
-		import_config(c)
-		import_config(parser.parse_args().dataset)
+		# import_config(c)
+		# import_config(parser.parse_args().dataset)
+
+	import_config(parser.parse_args().config)
+	import_config(parser.parse_args().dataset)
+
 
 
 		main()
