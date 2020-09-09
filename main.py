@@ -79,7 +79,7 @@ def main():
 					          results=train_results)
 	train.save_results({FOLD:test_results}, "./results")
 
-	print("Memory used :", convert_bytes(torch.cuda.max_memory_allocated()))
+	
 
 	
 

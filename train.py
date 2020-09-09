@@ -204,8 +204,8 @@ def run_training(model,
             epoch_loss = running_loss / len(dataloader.dataset)
             results.results[phase].epoch_losses.append(epoch_loss)
             
-            print("fold: {}, epoch: {}, phase: {}, e-loss: {}, prec: {}".format(
-                fold_num, epoch, phase, epoch_loss, score))
+            print("fold: {}, epoch: {}, phase: {}, e-loss: {}, prec: {}, memory: {}".format(
+                fold_num, epoch, phase, epoch_loss, score, convert_bytes(torch.cuda.max_memory_allocated())))
             
             if not find_lr:
                 if phase == "dev":
