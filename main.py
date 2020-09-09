@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
 
 	for c in ["configs/config_cifar100_resnet10", "configs/config_cifar100_resnet12", "configs/config_cifar100_resnet14", "configs/config_cifar100_resnet16"]:
-
+		print("||||| Model : ", c)
 		import_config(c)
 		import_config(parser.parse_args().dataset)
 
