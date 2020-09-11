@@ -126,7 +126,7 @@ if __name__ == '__main__':
 	parser.add_argument('-d', '--dataset',  help='dataset to use', required=False, default = "cifar10_data_loader.py")
 
 
-	for c in ["configs/config_cifar100_resnet10", "configs/config_cifar100_resnet12", "configs/config_cifar100_resnet14", "configs/config_cifar100_resnet16"]:
+	for c in ["configs/config_resnet4", "configs/config_resnet6", "configs/config_resnet8"]:
 		print("||||| Model : ", c)
 		import_config(c)
 		import_config(parser.parse_args().dataset)

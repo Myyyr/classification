@@ -11,6 +11,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+def convert_bytes(size):
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if size < 1024.0:
+            return "%3.1f %s" % (size, x)
+        size /= 1024.0
+
+    return size
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -34,29 +42,6 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
-        out += self.shortcut(x)
-        out = F.relu(out)
-        return out
-
-class SimpleBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, in_planes, planes, stride=1):
-        super(BasicBlock, self).__init__()
-        self.conv1 = nn.Conv2d(
-            in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(planes)
-
-        self.shortcut = nn.Sequential()
-        if stride != 1 or in_planes != self.expansion*planes:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion*planes,
-                          kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(self.expansion*planes)
-            )
-
-    def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
         out += self.shortcut(x)
         out = F.relu(out)
         return out
@@ -116,24 +101,69 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
+        print("||| StartForward :")
+        print("|||", x.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
+        out = self.conv1(x)
+        print("|||||| conv1 :")
+        print("||||||", out.shape)
+        print("||||||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("||||||", convert_bytes(torch.cuda.memory_allocated()))
+        out = self.bn1(out)
+        print("|||||| bn1 :")
+        print("||||||", out.shape)
+        print("||||||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("||||||", convert_bytes(torch.cuda.memory_allocated()))
+        out = F.relu(out)
+        print("|||||| relu :")
+        print("||||||", out.shape)
+        print("||||||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("||||||", convert_bytes(torch.cuda.memory_allocated()))
+        # out = F.relu(self.bn1(self.conv1(x)))
+        print("||| firstconv :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = self.layer1(out)
+        print("||| layer1 :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = self.layer2(out)
+        print("||| layer2 :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = self.layer3(out)
+        print("||| layer3 :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = self.layer4(out)
+        print("||| layer4 :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = F.avg_pool2d(out, 4)
+        print("||| avg_pool2d :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = out.view(out.size(0), -1)
+        print("||| view :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         out = self.linear(out)
+        print("||| linear :")
+        print("|||", out.shape)
+        print("|||", convert_bytes(torch.cuda.max_memory_allocated()))
+        print("|||", convert_bytes(torch.cuda.memory_allocated()))
         return out
 
 
 
-
-def ResNet6(num_classes = 10):
-    return ResNet(SimpleBlock, [1, 1, 1, 1], num_classes = num_classes)
-
-def ResNet8(num_classes = 10):
-    return ResNet(SimpleBlock, [1, 2, 2, 1], num_classes = num_classes)
 
 def ResNet10(num_classes = 10):
     return ResNet(BasicBlock, [1, 1, 1, 1], num_classes = num_classes)
