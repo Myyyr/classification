@@ -6,7 +6,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 BATCH_SIZE = 128
 N_WORKERS = 4
 
-EPOCHS = 300
+EPOCHS = 600
 PATIENCE = -1
 
 LR = 0.1
@@ -16,7 +16,7 @@ MOMENTUM = 0.9#0.9
 
 # LRS = [0.1,0.01,0.001]
 LRS = [0.1, 0.02, 0.004, 0.0008]
-LR_EPOCH = [60, 120, 160, 200]
+LR_EPOCH = [60*2, 120*2, 160*2, 200*2]
 
 MODEL = RevNet.RevNet98()
 
@@ -26,4 +26,4 @@ MODEL = RevNet.RevNet98()
 def SCHEDULER(optimizer):
 	return scheduler.SimpleScheduler(optimizer, LR_EPOCH, LRS)
 
-FOLD = "revnet98"
+FOLD = "revnet98_longer_training"
